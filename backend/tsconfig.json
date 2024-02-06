@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es2020", // Node.js version-specific target
+    "module": "commonjs", // Use CommonJS for Node.js
+    "outDir": "./dist", // Output directory for compiled files
+    "strict": true, // Enable all strict type-checking options
+    "esModuleInterop": true, // Enables ES Modules interop
+    "skipLibCheck": true, // Skip type checking of declaration files
+    "forceConsistentCasingInFileNames": true // Ensure case consistency in imports
+  },
+  "include": ["src/**/*"], // Source files to include
+  "exclude": ["node_modules", "**/*.spec.ts"] // Exclude node_modules and test files
+}
