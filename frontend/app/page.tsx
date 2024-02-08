@@ -23,16 +23,21 @@ export default function Home() {
       const response = await axios.post('http://localhost:3001/check-word', { word, prompt });
       setIsValid(response.data.isValid);
       if (!response.data.isValid) {
-        setError(response.data.error); // Ensure this line is in your code to handle displaying errors
+        // Customize the error message to include the user input
+        setError(`${word} ${response.data.error}`);
       } else {
-        setError(''); // Clear any previous error message
+        // If valid, clear any previous error message
+        setError(null); 
+        if (response.data.prompt) {
+          setPrompt(response.data.prompt);
+        }
       }
+      setWord(''); // Clear the input field after submission
     } catch (error) {
       console.error('Error checking word:', error);
     }
   };
   
-
   return (
     <div className="flex justify-center items-center h-screen bg-gray-50">
       <div className="flex flex-col items-center space-y-6">
@@ -47,11 +52,6 @@ export default function Home() {
             className="px-4 py-2 bg-gray-200 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
           />
           {error && <p className="text-lg mt-2 text-red-500">{error}</p>}
-          {!error && isValid !== null && (
-            <p className={`text-lg mt-2 ${isValid ? 'text-green-500' : 'text-red-500'}`}>
-              {isValid ? 'Vārds atrodas vārdnīcā!' : 'Vārds nav atrodams.'}
-            </p>
-          )}
           <button
             type="submit"
             className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"

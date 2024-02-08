@@ -21,23 +21,51 @@ app.get('/get-prompt', (req, res) => {
 });
 
 app.post('/check-word', (req, res) => {
-  const { word, prompt } = req.body; // Assuming prompt is passed along with the word
-  const requiredStartLetter = prompt.split(" ").pop()?.toLowerCase();
-  const firstLetterOfWord = word[0]?.toLowerCase();
+  const { word, prompt } = req.body;
+  let isValid = false;
+  let error = '';
+  let newPrompt = null; 
 
-  if (!requiredStartLetter || firstLetterOfWord !== requiredStartLetter) {
-    res.json({ isValid: false, error: 'nesākas ar ' + requiredStartLetter });
-    return;
+  if (words.includes(word.toLowerCase())) {
+    switch (true) {
+      case prompt.includes('3 burtu vārds'):
+        isValid = word.length === 3;
+        break;
+      case prompt.includes('4 burtu vārds'):
+        isValid = word.length === 4;
+        break;
+      case prompt.includes('5 burtu vārds'):
+        isValid = word.length === 5;
+        break;
+      case prompt.includes('6 burtu vārds'):
+        isValid = word.length === 6;
+        break;
+      case prompt.includes('7 burtu vārds'):
+        isValid = word.length === 7;
+        break;
+      case prompt.includes('satur'):
+        isValid = word.includes(prompt.split(' ')[1]);
+        break;
+      case prompt.includes('beidzas ar'):
+        isValid = word.endsWith(prompt.split(' ')[2]);
+        break;
+      default:
+        isValid = prompt.startsWith('sākas ar') ? word.toLowerCase().startsWith(prompt.split(' ')[2]) : true;
+    }
+    if (isValid) {
+      // If the word is valid, select a new prompt to return
+      const randomIndex = Math.floor(Math.random() * prompts.length);
+      newPrompt = prompts[randomIndex];
+    } else {
+      error = ' neatbilst nosacījumiem!';
+    }
+  } else {
+    error = ' nav derīgs vārds.';
   }
 
-  const isValid = words.includes(word.toLowerCase());
-  if (!isValid) {
-    res.json({ isValid: false, error: 'Vārds nav atrodams.' }); // 'Word not found.'
-    return;
-  }
-
-  res.json({ isValid: true });
+  res.json({ isValid, error, prompt: newPrompt }); // Return newPrompt in the response
 });
+
 
 
 app.listen(port, () => {
