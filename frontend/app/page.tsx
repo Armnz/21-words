@@ -2,20 +2,28 @@
 
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import ResultsPage from '../components/ResultsPage';
 
 export default function Home() {
   const [word, setWord] = useState('');
   const [isValid, setIsValid] = useState<boolean | null>(null);
   const [prompt, setPrompt] = useState('');
   const [error, setError] = useState<string | null>(null); // To store error messages
+  const [validWords, setValidWords] = useState<string[]>([]);
+  const [showResults, setShowResults] = useState(false);
 
   useEffect(() => {
-    const fetchPrompt = async () => {
-      const response = await axios.get('http://localhost:3001/get-prompt');
-      setPrompt(response.data.prompt);
-    };
     fetchPrompt();
   }, []);
+
+  const handleClose = () => {
+    setShowResults(false);
+  };
+
+  const fetchPrompt = async () => {
+    const response = await axios.get('http://localhost:3001/get-prompt');
+    setPrompt(response.data.prompt);
+  };
 
   const checkWord = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -23,20 +31,24 @@ export default function Home() {
       const response = await axios.post('http://localhost:3001/check-word', { word, prompt });
       setIsValid(response.data.isValid);
       if (!response.data.isValid) {
-        // Customize the error message to include the user input
         setError(`${word} ${response.data.error}`);
       } else {
-        // If valid, clear any previous error message
-        setError(null); 
-        if (response.data.prompt) {
-          setPrompt(response.data.prompt);
+        setError(null);
+        setValidWords(prev => [...prev, word]);
+        if (validWords.length >= 6) { // Change from >=6 to >=6 for 7 words
+          setShowResults(true);
+        } else {
+          fetchPrompt();
         }
       }
-      setWord(''); // Clear the input field after submission
+      setWord('');
     } catch (error) {
       console.error('Error checking word:', error);
     }
   };
+
+  if (showResults) {
+    return <ResultsPage words={validWords} onClose={handleClose} />;  }
   
   return (
     <div className="flex justify-center items-center h-screen bg-gray-50">

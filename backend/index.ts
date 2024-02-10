@@ -66,8 +66,6 @@ app.post('/check-word', (req, res) => {
   res.json({ isValid, error, prompt: newPrompt }); // Return newPrompt in the response
 });
 
-
-
 app.listen(port, () => {
   console.log(`Backend server listening at http://localhost:${port}`);
 });

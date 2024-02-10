@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Spēle: 21 vārds",
-  description: "Aizpildi 21 vārdu pēc iespējas ātrāk, par vārdu garumu papildus punkti.",
+  title: "21 vārds",
+  description: "Vārdu spēle",
 };
 
 export default function RootLayout({
