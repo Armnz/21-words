@@ -22,14 +22,26 @@ else if (prompt.startsWith('beidzas ar')) {
 }
 return false;};
 
-export default function(req: VercelRequest, res: VercelResponse) {
-  const { word, prompt } = req.body;
-  if (!satisfiesPrompt(word.toLowerCase(), prompt)) {
-    return res.json({ isValid: false, error: `neatbilst nosacījumiem!` });
+export default (req: VercelRequest, res: VercelResponse) => {
+  if (req.method === 'POST') {
+    const { word, prompt } = req.body;
+
+    // Check if the word satisfies the prompt condition
+    if (!satisfiesPrompt(word.toLowerCase(), prompt)) {
+      return res.json({ isValid: false, error: `${word} neatbilst nosacījumiem!` });
+    }
+
+    // Check if the word is in the word list
+    const isValid = words.includes(word.toLowerCase());
+    const error = isValid ? '' : `${word} nav derīgs vārds.`;
+    const newPrompt = isValid ? prompts[Math.floor(Math.random() * prompts.length)] : null;
+
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.json({ isValid, error, prompt: newPrompt });
+  } else {
+    // Handle non-POST requests or return an error message
+    res.status(405).json({ error: 'Method Not Allowed' });
   }
-  const isValid = words.includes(word.toLowerCase());
-  const error = isValid ? '' : `nav derīgs vārds.`;
-  const newPrompt = isValid ? prompts[Math.floor(Math.random() * prompts.length)] : null;
-  
-  res.json({ isValid, error, prompt: newPrompt });
-}
+};
