@@ -37,7 +37,7 @@ const Home = () => {
     const baseURL = 'https://21-words.vercel.app';
   
     const fetchPrompt = async () => {
-      const response = await axios.get(`${baseURL}/api/get-prompt`);
+      const response = await axios.get(`${baseURL}/api/get-prompt/route`);
       setPrompt(response.data.prompt);
     };
   
@@ -50,7 +50,7 @@ const Home = () => {
       }
   
       try {
-        const response = await axios.post(`${baseURL}/api/check-word`, { word, prompt });
+        const response = await axios.post(`${baseURL}/api/check-word/route`, { word, prompt });
         if (!response.data.isValid) {
           setError(`${word} ${response.data.error}`);
         } else {
