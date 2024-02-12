@@ -8,7 +8,7 @@ app.use(cors());
 const port = 3001;
 
 // Load the word list and prompts from JSON files
-const wordsFilePath = path.join(__dirname, 'words-long.json');
+const wordsFilePath = path.join(__dirname, 'wordsList.json');
 const words = JSON.parse(fs.readFileSync(wordsFilePath, 'utf-8'));
 const promptsFilePath = path.join(__dirname, 'prompts.json');
 const prompts = JSON.parse(fs.readFileSync(promptsFilePath, 'utf-8'));

@@ -5,13 +5,13 @@ import { useEffect, useState } from 'react';
 import ResultsPage from '../components/ResultsPage';
 
 const Home = () => {
-    const [word, setWord] = useState<string>(''); // Explicitly type `word` as string
-    const [prompt, setPrompt] = useState<string>(''); // Explicitly type `prompt` as string
-    const [error, setError] = useState<string>(''); // Explicitly type `error` as string
-    const [validWords, setValidWords] = useState<string[]>([]); // Explicitly type `validWords` as an array of strings
-    const [showResults, setShowResults] = useState<boolean>(false); // Explicitly type `showResults` as boolean
-    const [gameStarted, setGameStarted] = useState<boolean>(false); // Explicitly type `gameStarted` as boolean
-    const [timer, setTimer] = useState<number>(60); // Explicitly type `timer` as number
+    const [word, setWord] = useState<string>('');
+    const [prompt, setPrompt] = useState<string>('');
+    const [error, setError] = useState<string>('');
+    const [validWords, setValidWords] = useState<string[]>([]);
+    const [showResults, setShowResults] = useState<boolean>(false);
+    const [gameStarted, setGameStarted] = useState<boolean>(false);
+    const [timer, setTimer] = useState<number>(60);
   
     useEffect(() => {
       let intervalId: any;
@@ -33,9 +33,11 @@ const Home = () => {
       setError('');
       setTimer(60);
     };
+
+    const baseURL = 'https://21-words.vercel.app';
   
     const fetchPrompt = async () => {
-      const response = await axios.get('http://localhost:3001/get-prompt');
+      const response = await axios.get(`${baseURL}/api/get-prompt`);
       setPrompt(response.data.prompt);
     };
   
@@ -48,7 +50,7 @@ const Home = () => {
       }
   
       try {
-        const response = await axios.post('http://localhost:3001/check-word', { word, prompt });
+        const response = await axios.post(`${baseURL}/api/check-word`, { word, prompt });
         if (!response.data.isValid) {
           setError(`${word} ${response.data.error}`);
         } else {
