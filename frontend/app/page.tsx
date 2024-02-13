@@ -34,13 +34,11 @@ const Home = () => {
       setTimer(60);
     };
 
-    const baseURL = 'https://21-words.vercel.app';
-  
     const fetchPrompt = async () => {
-      const response = await axios.get(`${baseURL}/api/get-prompt/route`);
+      const response = await axios.get('/api/get-prompt');
       setPrompt(response.data.prompt);
     };
-  
+    
     const checkWord = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       if (validWords.includes(word)) {
@@ -48,13 +46,13 @@ const Home = () => {
         setWord('');
         return;
       }
-  
+    
       try {
-        const response = await axios.post(`${baseURL}/api/check-word/route`, { word, prompt });
+        const response = await axios.post('/api/check-word', { word, prompt });
         if (!response.data.isValid) {
           setError(`${word} ${response.data.error}`);
         } else {
-          setValidWords(prevWords => [...prevWords, word]);
+          setValidWords((prevWords) => [...prevWords, word]);
           setError('');
           if (validWords.length + 1 >= 21) {
             setShowResults(true);
@@ -67,6 +65,7 @@ const Home = () => {
         console.error('Error checking word:', error);
       }
     };
+    
   
     const startGame = () => {
       setGameStarted(true);
