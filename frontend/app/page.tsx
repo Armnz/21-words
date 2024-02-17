@@ -1,85 +1,97 @@
 'use client';
 
-import axios from 'axios';
 import { useEffect, useState } from 'react';
 import ResultsPage from '../components/ResultsPage';
 
 const Home = () => {
-    const [word, setWord] = useState<string>('');
-    const [prompt, setPrompt] = useState<string>('');
-    const [error, setError] = useState<string>('');
-    const [validWords, setValidWords] = useState<string[]>([]);
-    const [showResults, setShowResults] = useState<boolean>(false);
-    const [gameStarted, setGameStarted] = useState<boolean>(false);
-    const [timer, setTimer] = useState<number>(60);
-  
-    useEffect(() => {
-      let intervalId: any;
-      if (gameStarted && timer > 0) {
-        intervalId = setInterval(() => {
-          setTimer(prevTimer => prevTimer - 1);
-        }, 1000);
-      } else if (timer === 0 || validWords.length >= 21) {
-        setShowResults(true);
-        clearInterval(intervalId);
-      }
-      return () => clearInterval(intervalId);
-    }, [gameStarted, timer, validWords.length]);
-  
-    const handleClose = () => {
-      setShowResults(false);
-      setGameStarted(false);
-      setValidWords([]);
-      setError('');
-      setTimer(60);
-    };
+  const [word, setWord] = useState<string>('');
+  const [prompt, setPrompt] = useState<string>('');
+  const [error, setError] = useState<string>('');
+  const [validWords, setValidWords] = useState<string[]>([]);
+  const [showResults, setShowResults] = useState<boolean>(false);
+  const [gameStarted, setGameStarted] = useState<boolean>(false);
+  const [timer, setTimer] = useState<number>(60);
 
-    const fetchPrompt = async () => {
-      const response = await axios.get('/api/get-prompt');
-      setPrompt(response.data.prompt);
-    };
-    
-    const checkWord = async (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      if (validWords.includes(word)) {
-        setError(`${word} jau tika izmantots!`);
-        setWord('');
-        return;
-      }
-    
-      try {
-        const response = await axios.post('/api/check-word', { word, prompt });
-        if (!response.data.isValid) {
-          setError(`${word} ${response.data.error}`);
-        } else {
-          setValidWords((prevWords) => [...prevWords, word]);
-          setError('');
-          if (validWords.length + 1 >= 21) {
-            setShowResults(true);
-          } else {
-            fetchPrompt();
-          }
-        }
-        setWord('');
-      } catch (error) {
-        console.error('Error checking word:', error);
-      }
-    };
-    
-  
-    const startGame = () => {
-      setGameStarted(true);
-      setTimer(60);
-      setValidWords([]);
-      setError('');
-      setShowResults(false);
-      fetchPrompt();
-    };
-  
-    if (showResults) {
-      const completedWords = validWords.concat(Array(21 - validWords.length).fill('-'));
-      return <ResultsPage words={completedWords} onClose={handleClose} />;
+  useEffect(() => {
+    let intervalId: any;
+    if (gameStarted && timer > 0) {
+      intervalId = setInterval(() => {
+        setTimer((prevTimer) => prevTimer - 1);
+      }, 1000);
+    } else if (timer === 0 || validWords.length >= 21) {
+      setShowResults(true);
+      clearInterval(intervalId);
     }
+    return () => clearInterval(intervalId);
+  }, [gameStarted, timer, validWords.length]);
+
+  const handleClose = () => {
+    setShowResults(false);
+    setGameStarted(false);
+    setValidWords([]);
+    setError('');
+    setTimer(60);
+  };
+
+  const fetchPrompt = async () => {
+    try {
+      const response = await fetch('/api/get-prompt');
+      if (!response.ok) throw new Error('Network response was not ok.');
+      const data = await response.json();
+      setPrompt(data.prompt);
+    } catch (error) {
+      console.error('Error fetching prompt:', error);
+    }
+  };
+
+  const checkWord = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (validWords.includes(word)) {
+      setError(`${word} jau tika izmantots!`);
+      setWord('');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/check-word', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ word, prompt }),
+      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+      if (!data.isValid) {
+        setError(`${word} ${data.error}`);
+      } else {
+        setValidWords((prevWords) => [...prevWords, word]);
+        setError('');
+        if (validWords.length + 1 >= 21) {
+          setShowResults(true);
+        } else {
+          fetchPrompt();
+        }
+      }
+      setWord('');
+    } catch (error) {
+      console.error('Error checking word:', error);
+    }
+  };
+
+  const startGame = () => {
+    setGameStarted(true);
+    setTimer(60);
+    setValidWords([]);
+    setError('');
+    setShowResults(false);
+    fetchPrompt();
+  };
+
+  if (showResults) {
+    const completedWords = validWords.concat(Array(21 - validWords.length).fill('-'));
+    return <ResultsPage words={completedWords} onClose={handleClose} />;
+  }
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50 px-4">
@@ -98,7 +110,7 @@ const Home = () => {
                 type="text"
                 name="word"
                 value={word}
-                onChange={e => setWord(e.target.value)}
+                onChange={(e) => setWord(e.target.value)}
                 placeholder="Ievadi vārdu"
                 className="w-full px-4 py-2 bg-gray-200 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
               />
@@ -109,6 +121,6 @@ const Home = () => {
       )}
     </div>
   );
-}
+};
 
 export default Home;

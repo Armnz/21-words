@@ -1,13 +1,10 @@
-import type { Request, Response } from 'next';
-import fs from 'fs';
-import path from 'path';
+import type { NextApiRequest, NextApiResponse } from 'next';
 
 import prompts from '../data/prompts.json';
 import wordList from '../data/wordsList.json';
 
-// TypeScript type assertions
-const promptsArray: string[] = prompts as string[];
-const wordListArray: string[] = wordList as string[];
+const promptsArray: string[] = prompts as unknown as string[];
+const wordListArray: string[] = wordList as unknown as string[];
 
 
 const satisfiesPrompt = (word: string, prompt: string): boolean => {
@@ -24,33 +21,45 @@ const satisfiesPrompt = (word: string, prompt: string): boolean => {
   return false;
 };
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export function POST(req: NextApiRequest) {
+  if (req.method !== 'POST') {
+    // Ideally, you should handle non-POST requests properly.
+    // However, directly returning a new Response like this isn't standard in Next.js API routes.
+  }
+
   const { word, prompt } = req.body;
 
   if (!word || !prompt) {
-    res.setHeader('Content-Type', 'application/json');
-    res.statusCode = 400;
-    res.end(JSON.stringify({ error: 'Word and prompt are required.' }));
-    return;
+    return new Response(JSON.stringify({ error: 'Word and prompt are required.' }), {
+      status: 400,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
   }
 
   if (!satisfiesPrompt(word.toLowerCase(), prompt)) {
-    res.setHeader('Content-Type', 'application/json');
-    res.statusCode = 400;
-    res.end(JSON.stringify({ isValid: false, error: 'Neatbilst nosacījumiem!' }));
-    return;
+    return new Response(JSON.stringify({ isValid: false, error: 'Neatbilst nosacījumiem!' }), {
+      status: 400,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
   }
 
   const isValid = wordListArray.includes(word.toLowerCase());
   const error = isValid ? '' : 'Nav derīgs vārds.';
-  let newPrompt: string | null = null;
+  let newPrompt = null;
 
   if (isValid) {
     const newPromptIndex = Math.floor(Math.random() * promptsArray.length);
-    newPrompt = promptsArray[newPromptIndex];
+    newPrompt = promptsArray[newPromptIndex]; // Ensure this matches your actual data structure
   }
 
-  res.setHeader('Content-Type', 'application/json');
-  res.statusCode = 200;
-  res.end(JSON.stringify({ isValid, error, newPrompt }));
+  return new Response(JSON.stringify({ isValid, error, newPrompt }), {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 }
