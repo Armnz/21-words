@@ -23,8 +23,6 @@ const satisfiesPrompt = (word: string, prompt: string): boolean => {
 
 export function POST(req: NextApiRequest) {
   if (req.method !== 'POST') {
-    // Ideally, you should handle non-POST requests properly.
-    // However, directly returning a new Response like this isn't standard in Next.js API routes.
   }
 
   const { word, prompt } = req.body;
@@ -53,7 +51,7 @@ export function POST(req: NextApiRequest) {
 
   if (isValid) {
     const newPromptIndex = Math.floor(Math.random() * promptsArray.length);
-    newPrompt = promptsArray[newPromptIndex]; // Ensure this matches your actual data structure
+    newPrompt = promptsArray[newPromptIndex];
   }
 
   return new Response(JSON.stringify({ isValid, error, newPrompt }), {
